@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import { useState, useEffect } from 'react'
 import { fetchImg } from 'services/pixabay-api';
 import Searchbar  from 'components/Searchbar';
 import Modal from 'components/Modal';
@@ -9,7 +9,6 @@ import Button from 'components/Button';
 import { ToastContainer } from 'react-toastify';
 
 
-const PER_PAGE = 12;
 const Status = {
   IDLE: 'idle',
   PENDING: 'pending',
@@ -17,62 +16,89 @@ const Status = {
   REJECTED: 'rejected',
 };
 
-class App extends Component {
-  state = {
-    status: Status.IDLE,
-    searchQuery: '',
-    images: [],
-    totalHits: 0,
-    page: 1,
-    error: null,
-    showModal: false,
-    modalImgProps: { url: '', alt: '' },
-  };
+function App () {
+  // state = {
+  //   status: Status.IDLE,
+  //   searchQuery: '',
+  //   images: [],
+  //   totalHits: 0,
+  //   page: 1,
+  //   error: null,
+  //   showModal: false,
+  //   modalImgProps: { url: '', alt: '' },
+  // };
+  const [status, setStatus] = useState(Status.IDLE);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [images, setImages] = useState([]);
+  const [totalHits, setTotalHits] = useState(0);
+  const [page, setPage] = useState(1);
+  const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [modalImgProps, setModalImgProps] = useState({ url: '', alt: '' });
 
-  async componentDidUpdate(_, prevState) {
-    const prevQuery = prevState.searchQuery;
-    const nextQuery = this.state.searchQuery;
+  // async componentDidUpdate(_, prevState) {
+  //   const prevQuery = prevState.searchQuery;
+  //   const nextQuery = this.state.searchQuery;
 
-    if (prevQuery !== nextQuery) {
-      await this.reset();
-      this.setState({ status: Status.PENDING });
-      await this.fetchImages(nextQuery);
+  //   if (prevQuery !== nextQuery) {
+  //     await this.reset();
+  //     this.setState({ status: Status.PENDING });
+  //     await this.fetchImages(nextQuery);
+  //   }
+  // }
+  useEffect(() => {
+    // setStatus(Status.PENDING);
+    if(!searchQuery){
+      reset();
+      return;
     }
-  }
+    fetchImages(searchQuery);
+       // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery]);
 
-  fetchImages = query => {
-    const { page } = this.state;
-    fetchImg(query, page, PER_PAGE)
+  useEffect(() => {
+    if (page > 1) {
+      fetchImages(searchQuery, page);
+    }
+  }, [page]);
+
+  const fetchImages = (searchQuery, page) => {
+    // const { page } = this.state;
+    fetchImg(searchQuery, page)
       .then(({ hits, totalHits }) => {
         if (hits.length === 0) {
           return Promise.reject(new Error('Oops! Nothing found'));
         }
+        setImages(prevImages => [...prevImages, ...hits]);
+        setTotalHits(totalHits);
+        setStatus(Status.RESOLVED);
 
-        this.setState(prevState => ({
-          images: [...prevState.images, ...hits],
-          totalHits,
-          status: Status.RESOLVED,
-        }));
+        // this.setState(prevState => ({
+        //   images: [...prevState.images, ...hits],
+        //   totalHits,
+        //   status: Status.RESOLVED,
+        // })
+        // );
       })
-      .catch(error => this.setState({ error, status: Status.REJECTED }));
+      .catch(error => {setError(error); setStatus(Status.REJECTED)});
+       };
+
+  const reset = () => {
+    setPage(1);
+    setImages([]);
   };
 
-  reset = () => {
-    this.setState({ page: 1, images: [] });
+  const handleLoadMoreBtnClick = () => {
+    incrementPage();
+    fetchImages(searchQuery);
+    scrollDown();
   };
 
-  handleLoadMoreBtnClick = async () => {
-    const query = this.state.searchQuery;
-    await this.incrementPage();
-    this.fetchImages(query);
-    this.scrollDown();
+  const incrementPage = () => {
+    setPage(page => page + 1);
   };
 
-  incrementPage = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
-  };
-
-  scrollDown = () => {
+  const scrollDown = () => {
     setTimeout(() => {
       window.scrollTo({
         top: document.body.scrollHeight,
@@ -82,46 +108,48 @@ class App extends Component {
     }, 500);
   };
 
-  handleSearchFormSubmit = searchQuery => {
-    this.setState({ searchQuery });
+  const handleSearchFormSubmit = query => {
+    // this.setState({ searchQuery });
+    setSearchQuery(query);
   };
 
-  toggleModal = () => {
-    this.setState(({ showModal }) => ({ showModal: !showModal }));
+  const toggleModal = () => {
+    // this.setState(({ showModal }) => ({ showModal: !showModal }));
+    setShowModal(!showModal);
   };
 
-  handleImgClick = ({ largeImageURL: url, tags: alt }) => {
-    this.setState({ modalImgProps: { url, alt } });
-    this.toggleModal();
+  const handleImgClick = ({ largeImageURL: url, tags: alt }) => {
+    // this.setState({ modalImgProps: { url, alt } });
+    // this.toggleModal();
+    setModalImgProps({ url, alt });
+    toggleModal();
   };
 
+    // const {
+    //   status,
+    //   images,
+    //   error,
+    //   showModal,
+    //   page,
+    //   totalHits,
+    //   modalImgProps: { url, alt },
+    // } = this.state;
 
-  render() {
-    const {
-      status,
-      images,
-      error,
-      showModal,
-      page,
-      totalHits,
-      modalImgProps: { url, alt },
-    } = this.state;
-
-    const totalPages = Math.ceil(totalHits / PER_PAGE);
+    const totalPages = Math.ceil(totalHits / 12);
     return (
      
       <div>
-        <Searchbar onSubmit={this.handleSearchFormSubmit} />
+        <Searchbar onSubmit={handleSearchFormSubmit} />
         {status === 'pending' && <Loader />}
-        {status === 'rejected' && <Error message={error.message} />}
+        {status === 'rejected' && <Error message={error} />}
         {status === 'resolved' && (
           <div>
             {showModal && (
-              <Modal onClose={this.toggleModal} url={url} alt={alt} />
+              <Modal onClose={toggleModal} url={modalImgProps.url} alt={modalImgProps.alt} />
             )}
-            <ImageGallery images={images} openModal={this.handleImgClick} />
+            <ImageGallery images={images} openModal={handleImgClick} />
             {totalPages !== page && (
-              <Button handleLoadMore={this.handleLoadMoreBtnClick} />
+              <Button handleLoadMore={handleLoadMoreBtnClick} />
             )}
           </div>
         )}
@@ -129,6 +157,6 @@ class App extends Component {
       <ToastContainer autoClose={3000}/> 
       </div>
     );
-  }
+  
 }
 export default App;

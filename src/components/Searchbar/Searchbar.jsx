@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import  { useState } from 'react';
 import PropTypes from 'prop-types';
 import { FaSearch } from 'react-icons/fa';
 import s from './Searchbar.module.css';
@@ -6,32 +6,34 @@ import { toast } from 'react-toastify';
 
 
 
-class Searchbar extends Component {
-  state = {
-    query: '',
+function Searchbar ({onSubmit}){
+  // state = {
+  //   query: '',
+  // };
+  const [query, setQuery] = useState('');
+
+
+  const handleQueryChange = e => {
+    // this.setState({ query: e.currentTarget.value.toLowerCase() });
+    setQuery(e.currentTarget.value);
   };
 
-  handleQueryChange = e => {
-    this.setState({ query: e.currentTarget.value.toLowerCase() });
-  };
-
-  handleSubmit = e => {
-    const { query } = this.state;
-    const { onSubmit } = this.props;
+  const handleSubmit = e => {
+    // const { query } = this.state;
+    // const { onSubmit } = this.props;
     e.preventDefault();
     if (!query.trim()) {
       toast('Please, enter search query.');
-      return;
+      
     }
     onSubmit(query);
-    this.setState({ query: '' });
+    // this.setState({ query: '' });
+    setQuery('');
   };
 
-  render() {
-    const { query } = this.state;
     return (
       <header className={s.searchbar}>
-      <form className={s.searchForm} onSubmit={this.handleSubmit}>
+      <form className={s.searchForm} onSubmit={handleSubmit}>
         <button type="submit" className={s.searchFormBtn}>
           <FaSearch />
         </button>
@@ -42,12 +44,11 @@ class Searchbar extends Component {
           autoComplete="off"
           autoFocus
           placeholder="Search images and photos"
-          onChange={this.handleQueryChange}
+          onChange={handleQueryChange}
         />
       </form>
     </header>
     );
-  }
 }
 
 Searchbar.propTypes = {
