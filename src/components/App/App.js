@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { ToastContainer } from 'react-toastify';
 
-import Searchbar from './components/Searchbar';
-import ImageGallery from './components/ImageGallery';
-import Modal from './components/Modal';
+import Searchbar from 'components/Searchbar';
+import ImageGallery from 'components/ImageGallery';
+import Modal from 'components/Modal';
 
 import 'react-toastify/dist/ReactToastify.css';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
