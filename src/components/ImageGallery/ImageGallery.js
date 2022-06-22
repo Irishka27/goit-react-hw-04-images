@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 
 import PropTypes from 'prop-types';
-import pixabayApi from '../../services/pixabayApi';
+import {fetchImages} from '../../services/pixabayApi';
 
 import ImageGalleryItem from './ImageGalleryItem';
 import Button from '../Button';
@@ -37,10 +37,10 @@ export default function ImageGallery({ imageName, handleModal }) {
     if (currentPage > 1) {
       getImages(imageName, currentPage);
     }
-  }, [currentPage]);
+  }, [currentPage, imageName]);
 
   const getImages = (imageName, currentPage) => {
-    pixabayApi.fetchImages(imageName, currentPage).then(images => {
+    fetchImages(imageName, currentPage).then(images => {
       if (images.length === 0) {
         toast.error('Ничего не найдено');
         setStatus(Status.REJECTED);
