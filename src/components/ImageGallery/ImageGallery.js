@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import PropTypes from 'prop-types';
 import pixabayApi from '../../services/pixabayApi';
 
-import ImageGalleryItem from '../ImageGalleryItem';
+import ImageGalleryItem from './ImageGalleryItem';
 import Button from '../Button';
 import Loader from '../Loader';
 
