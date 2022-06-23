@@ -1,13 +1,9 @@
 import { useState } from 'react';
 import { ToastContainer } from 'react-toastify';
-
 import Searchbar from '../Searchbar';
 import ImageGallery from '../ImageGallery';
 import Modal from '../Modal';
-
-import 'react-toastify/dist/ReactToastify.css';
-import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
-import './App.css';
+import s from './App.module.css';
 
 export default function App() {
   const [imageName, setImageName] = useState('');
@@ -24,11 +20,11 @@ export default function App() {
   };
 
   return (
-    <div className="App">
+    <div className={s.App}>
       <Searchbar onSubmit={handleFormSubmit} />
       <ImageGallery imageName={imageName} handleModal={toggleModal} />
       {showModal && <Modal onClose={toggleModal} imageURL={stateURL} />}
-      <ToastContainer />
+      <ToastContainer autoClose={3000}/>
     </div>
   );
 }

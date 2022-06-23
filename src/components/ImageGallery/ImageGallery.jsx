@@ -59,17 +59,12 @@ export default function ImageGallery({ imageName, handleModal }) {
     handleModal(e.target.lowsrc);
   };
 
-  if (status === 'idle' || status === 'rejected') {
-    return <ul className={s.Gallery}></ul>;
-  }
-
-  if (status === 'pending') {
-    return <Loader />;
-  }
-
-  if (status === 'resolved') {
-    return (
+  return (
       <>
+      {(status === 'idle' || status === 'rejected') && <ul className={s.Gallery}></ul>}
+      {status === 'pending' && <Loader />}
+      {status === 'resolved' && (
+      <div>
         <ul className={s.Gallery}>
           {images.map(image => (
             <ImageGalleryItem
@@ -82,9 +77,10 @@ export default function ImageGallery({ imageName, handleModal }) {
           ))}
         </ul>
         <Button onLoadMore={incrementPage} />
+        </div>)}
       </>
     );
-  }
+  
 }
 
 ImageGallery.propTypes = {
